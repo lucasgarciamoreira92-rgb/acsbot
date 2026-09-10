@@ -1,6 +1,14 @@
 # ACS Pilot · 0.2.0
 
-**GitHub e teste no Mac:** siga [COMECE_AQUI.md](COMECE_AQUI.md).
+**Executar a plataforma no Mac:**
+
+```bash
+cd ~/acsbot
+git pull --ff-only
+bash iniciar-mac.sh
+```
+
+Abra **http://127.0.0.1:8787**. Cadastros e credenciais ficam salvos neste computador. Veja o [guia de operação local](COMECE_AQUI.md) para executar os lotes reais.
 
 Plataforma privada para preparar implantação de ACS pela interface web dos equipamentos administrados pelo operador. Esta versão inclui servidor persistente e agente local; os roteiros precisam de validação por firmware.
 
@@ -40,7 +48,9 @@ python3 scripts/package-agent.py
 
 O teste Node usa SQLite real com uma camada equivalente à API D1 e verifica criptografia JavaScript, descriptografia/execução em Python e importação do relatório. Os testes do executor simulam a API Playwright, sem navegador.
 
-Nesta entrega foram verificados build de produção, tipos da interface, servidor, protocolo e testes unitários do agente. O download do Chromium falhou neste ambiente; `agent/selftest_browser.py` foi incluído para execução após a instalação do navegador, mas não foi aprovado aqui. Nenhum roteador, ONU ou ACS real foi acessado.
+A base teve build de produção, servidor, protocolo e testes unitários do agente verificados. O operador concluiu `agent/selftest_browser.py` com sucesso no Mac, incluindo login, identidade, gravação e releitura no simulador. Nenhum roteador, ONU ou ACS real foi validado nesta entrega.
+
+O modo local reutiliza as mesmas APIs, regras e criptografia da plataforma com SQLite no computador. `local/build.mjs` prepara a interface e as APIs; `local/server.mjs` atende apenas em loopback. A identidade local é criada exclusivamente nesse servidor, sem alterar a autenticação do serviço hospedado. Para verificar a persistência e os limites HTTP locais: `node --test tests/local-runtime.test.mjs`, após o build local.
 
 ## Limites conhecidos
 

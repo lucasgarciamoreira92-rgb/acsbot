@@ -1,47 +1,72 @@
-# ACS Pilot — GitHub e primeiro teste no Mac
+# ACS Pilot — executar no Mac
 
-Este pacote contém o código completo do painel, APIs, agente Python, simulador e testes. Versão funcional 0.2.0, baseada no commit `8130552` do projeto, com instruções e script para instalação no Mac.
+## Abrir a plataforma local
 
-## 1. Baixar o repositório no Mac
+Se o repositório já está no seu Mac:
 
-No Terminal:
+```bash
+cd ~/acsbot
+git pull --ff-only
+bash iniciar-mac.sh
+```
+
+A plataforma abre no navegador em **http://127.0.0.1:8787**. Mantenha o Terminal aberto enquanto estiver usando. **Ctrl+C** encerra o servidor; para abrir novamente, execute `bash iniciar-mac.sh`.
+
+O comando inicia o painel de operação. Não executa simuladores nem acessa equipamentos automaticamente.
+
+Na primeira inicialização, ele instala as dependências do painel e prepara a interface. Requer Node.js 22.13 ou superior e npm. Se o Mac tem Homebrew e falta um Node compatível, o script instala `node@22`. Sem Homebrew, ele indica a instalação oficial do Node.js. Depois da instalação inicial, os cadastros e o painel funcionam localmente; a execução dos equipamentos depende do acesso do Mac à rede de gerência.
+
+Se ainda não baixou o projeto:
 
 ```bash
 cd ~
 git clone https://github.com/lucasgarciamoreira92-rgb/acsbot.git
 cd acsbot
+bash iniciar-mac.sh
 ```
 
-Se você já clonou este repositório, entre na pasta existente e use `git pull --ff-only` para atualizar. Se houver alterações locais ou histórico divergente, revise antes de continuar.
+## Preparar e executar um lote real
 
-## 2. Instalar e testar o agente
-
-Na mesma pasta:
+1. Em **Credenciais de acesso**, cadastre uma lista de usuários e senhas da operação.
+2. Em **Modelos e roteiros**, cadastre ou importe o roteiro exato do modelo e firmware, vinculando a lista. Os seis modelos demonstrativos não são adaptadores homologados.
+3. Em **Equipamentos**, importe os endereços e selecione os equipamentos do lote.
+4. Em **Servidor ACS**, configure os parâmetros de destino.
+5. Em **Agente local**, escolha **Validar acesso**, gere o pacote e baixe o arquivo. Guarde a chave mostrada nessa tela.
+6. Abra outro Terminal e execute:
 
 ```bash
-bash testar-agente-mac.sh
+cd ~/acsbot
+bash executar-agente-mac.sh
 ```
 
-Requer **Python 3.11 ou superior**. O script cria `agent/.venv`, instala as dependências e o Chromium, executa os testes do agente e abre o teste com roteador simulado em `127.0.0.1`. Não precisa instalar Node.js para esse teste.
+Escolha o arquivo `.acspkg` na janela que abrir. Cole a chave no Terminal quando solicitada. A chave não aparece durante a digitação. O navegador acessará somente os equipamentos do pacote.
 
-O teste de navegador ainda precisa passar na sua máquina. A validação de um equipamento real e a comunicação real com o ACS continuam pendentes.
+O agente precisa de Python 3.11 ou superior. O script aproveita `agent/.venv` já instalado; quando necessário, prepara o ambiente e o Chromium. Você também pode indicar o pacote diretamente:
 
-## 3. Usar a plataforma
+```bash
+bash executar-agente-mac.sh "$HOME/Downloads/nome-do-pacote.acspkg"
+```
 
-O painel continua online: https://acs-pilot.lucasgarciamoreira92.chatgpt.site
+Substitua o nome pelo arquivo real baixado. Ao terminar, importe o relatório no painel, em **Agente local → Importar relatório assinado**. Os relatórios ficam em `~/acsbot/.acs-local/results`. No seletor de arquivos do Mac, pressione **⌘⇧G** e cole esse caminho.
 
-O agente roda no Mac com acesso à sua rede. O fluxo desta versão usa pacotes criptografados baixados pelo painel e relatórios importados depois. Consulte `agent/README.md` para cadastrar o simulador no painel ou executar um pacote real.
+Depois de uma validação bem-sucedida importada, escolha **Implantar ACS**, gere o novo pacote e execute o agente novamente. Os limites de tentativas e a conferência de identidade continuam ativos. A comunicação com o ACS é confirmada separadamente da configuração gravada.
 
-O código do painel está incluído para desenvolvimento. Sua implantação atual usa Cloudflare Workers, D1 e autenticação do Sites; copiar o repositório não transfere o banco ou os segredos de produção nem instala automaticamente um painel completo no Mac.
+O andamento aparece no Terminal; o painel recebe o resultado quando você importa o relatório. Esta versão continua usando pacotes e relatórios, mesmo com tudo executado no Mac.
 
-Para o primeiro equipamento real, informe fabricante, modelo, firmware e sistema ACS utilizado. Os modelos demonstrativos precisam de roteiros adaptados e validados.
+## Cadastros e chave local
 
-## Estrutura
+Os cadastros deste computador ficam em `.acs-local/data/acsbot.sqlite`, com os campos do cadastro criptografados. A chave está em `.acs-local/data/vault.key`; o servidor cria a chave apenas na primeira inicialização e a mantém nas seguintes.
 
-- `app/`, `lib/`, `db/`, `drizzle/`, `worker/`: painel, APIs e persistência.
-- `agent/`: agente local, simulador, guia e testes Python.
-- `tests/`: testes do servidor e interface.
-- `public/downloads/`: ZIP original do agente disponível na plataforma.
-- `testar-agente-mac.sh`: instalação e teste local com navegador.
+O banco local é independente do painel online. Os cadastros feitos online não aparecem automaticamente no Mac, e os feitos no Mac não são enviados ao serviço online.
 
-O arquivo `.env.example` contém somente valores de exemplo. A chave de produção e os dados cadastrados não fazem parte deste pacote.
+Para um backup completo, encerre o servidor com Ctrl+C e copie a pasta `.acs-local/data` inteira, incluindo banco e chave. Não exclua nem substitua a chave se já houver dados. Essa pasta, os relatórios e as saídas de compilação estão fora do Git.
+
+A sessão local é destinada ao usuário deste Mac e o servidor escuta somente em `127.0.0.1`. Não é uma instalação para acesso compartilhado na rede. Se a porta padrão já estiver ocupada:
+
+```bash
+ACS_PORT=8788 bash iniciar-mac.sh
+```
+
+## Verificação opcional do agente
+
+O comando `bash testar-agente-mac.sh` continua disponível para o simulador. Ele não inicia o painel. O teste com navegador foi concluído com sucesso no Mac do operador; cada roteiro de equipamento real ainda precisa ser adaptado e validado.

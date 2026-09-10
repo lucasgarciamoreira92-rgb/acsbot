@@ -63,3 +63,6 @@ venv/
 acs-resultado-*.json*
 /agent/modelo-laboratorio.json
 /backups/
+
+# Plataforma e dados locais do Mac
+/.acs-local/
