@@ -1,5 +1,20 @@
 # ACS Pilot — executar no Mac
 
+## Roadmap v2 — iniciar o M0
+
+Para preparar o Mac para a integração com GenieACS:
+
+```bash
+cd ~/acsbot
+git pull --ff-only
+bash diagnostico-mac.sh
+```
+
+Envie o resultado do Terminal para conferirmos o ambiente. O diagnóstico não
+instala programas nem altera equipamentos. Veja os critérios em [M0](docs/M0.md).
+A integração GenieACS e a fila sequencial estão no roadmap; as instruções por
+pacotes abaixo descrevem a versão atualmente disponível.
+
 ## Abrir a plataforma local
 
 Se o repositório já está no seu Mac:
